@@ -16,9 +16,9 @@ int main()
 		// спосіб 1: скорочена форма 
 		if (x < 1)
 			F = a * pow(x, 2) + (b / c);
-		if (x > 1.5)
+		if (x > 1.5 && c == 0)
 			F = (x - a) / pow((x - c), 2);
-		if (x >= 1 && x <= 1.5) 
+		if (x >= 1 && c != 0) 
 			F = pow(x, 2) / pow(c, 2);
 
 		cout << "1) F = " << F << endl;
@@ -26,7 +26,7 @@ int main()
 		// спосіб 2: повна форма 
 		if (x < 1)
 			F = a * pow(x, 2) + (b / c);
-		else if (x > 1.5)
+		else if (x > 1.5 && c == 0)
 			F = (x - a) / pow((x - c), 2);
 		else 
 			F = pow(x, 2) / pow(c, 2);
