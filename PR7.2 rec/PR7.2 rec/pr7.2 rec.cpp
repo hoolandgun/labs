@@ -1,42 +1,57 @@
 #include <iostream>
 #include <iomanip>
-#include <time.h>
+#include <ctime>
+
 using namespace std;
 
 void AllocateMemory(int** q, const int rowCount, const int colCount, int k);
 void FreeMemory(int** q, const int rowCount, int k);
-void Create(int** q, const int rowCount, const int colCount,
-	const int Low, const int High, int k, int n);
+void Create(int** q, const int rowCount, const int colCount, const int Low, const int High, int k, int n);
 void Print(int** q, const int rowCount, const int colCount, int k, int n);
-int ColMin(int** q, const int rowCount, int k, int n, int min);
-void FindMin(int** q, const int rowCount, int& min0, int& min2, int& min4, int& min6);
-int SumOfMins(const int m0, const int m2, const int m4, const int m6);
+
+int FindMin(int** q, const int rowCount, int n, int k, int currentMin);
+int FindAndSumMinsRec(int** q, const int rowCount, const int colCount, int n);
 
 #ifndef LINK_TEST
 int main()
 {
 	srand((unsigned)time(NULL));
-	int Low = 7;
-	int High = 62;
-	int rowCount = 7;
-	int colCount = 8;
+
+	int rowCount, colCount;
+	cout << "Enter row count: "; cin >> rowCount;
+	cout << "Enter col count: "; cin >> colCount;
+
+	if (colCount < 1 || rowCount < 1)
+	{
+		cout << "Please correct entered data!";
+		return -1;
+	}
+
+	int Low, High;
+	cout << "Enter minimal random value (Low): "; cin >> Low;
+	cout << "Enter maximal random value (High): "; cin >> High;
+
+	if (High < Low)
+	{
+		cout << "High must be bigger than Low!";
+		return -1;
+	}
 
 	int** q = new int* [rowCount];
-	AllocateMemory(q, rowCount, colCount, 0);
 
+	AllocateMemory(q, rowCount, colCount, 0);
 	Create(q, rowCount, colCount, Low, High, 0, 0);
+
 	cout << endl;
 	Print(q, rowCount, colCount, 0, 0);
 
-	int min, min0, min2, min4, min6;
-	FindMin(q, rowCount, min0, min2, min4, min6);
+	int totalSum = FindAndSumMinsRec(q, rowCount, colCount, 0);
 
-	int totalSum = SumOfMins(min0, min2, min4, min6);
-
-	cout << min0 << " + " << min2 << " + " << min4 << " + " << min6 << " = " << totalSum << endl;
+	cout << "Sum of minimums in even columns = " << totalSum << endl;
 
 	FreeMemory(q, rowCount, 0);
 	delete[] q;
+
 	return 0;
 }
 #endif
@@ -55,8 +70,7 @@ void FreeMemory(int** q, const int rowCount, int k)
 	FreeMemory(q, rowCount, k + 1);
 }
 
-void Create(int** q, const int rowCount, const int colCount,
-	const int Low, const int High, int k, int n)
+void Create(int** q, const int rowCount, const int colCount, const int Low, const int High, int k, int n)
 {
 	q[k][n] = Low + rand() % (High - Low + 1);
 	if (n < colCount - 1)
@@ -81,23 +95,22 @@ void Print(int** q, const int rowCount, const int colCount, int k, int n)
 			cout << endl << endl;
 }
 
-int ColMin(int** q, const int rowCount, int k, int n, int min)
+int FindMin(int** q, const int rowCount, int n, int k, int currentMin)
 {
-	if (k >= rowCount) return min;
-	if (q[k][n] < min)
-		min = q[k][n];
-	return ColMin(q, rowCount, k + 1, n, min);
+	if (k >= rowCount)
+		return currentMin;
+	if (q[k][n] < currentMin)
+		currentMin = q[k][n];
+	return FindMin(q, rowCount, n, k + 1, currentMin);
 }
 
-void FindMin(int** q, const int rowCount, int& min0, int& min2, int& min4, int& min6)
+int FindAndSumMinsRec(int** q, const int rowCount, const int colCount, int n)
 {
-	min0 = ColMin(q, rowCount, 1, 0, q[0][0]);
-	min2 = ColMin(q, rowCount, 1, 2, q[0][2]);
-	min4 = ColMin(q, rowCount, 1, 4, q[0][4]);
-	min6 = ColMin(q, rowCount, 1, 6, q[0][6]);
-}
+	if (n >= colCount)
+		return 0;
 
-int SumOfMins(const int m0, const int m2, const int m4, const int m6)
-{
-	return m0 + m2 + m4 + m6;
+	int min = FindMin(q, rowCount, n, 1, q[0][n]);
+	cout << "Min in col " << n << " = " << min << endl;
+
+	return min + FindAndSumMinsRec(q, rowCount, colCount, n + 2);
 }
